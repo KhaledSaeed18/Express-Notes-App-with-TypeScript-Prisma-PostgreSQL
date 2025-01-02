@@ -55,7 +55,9 @@ JWT_REFRESH_SECRET=your-jwt-refresh-secret-key
 4- Set up the database:
 
 ```bash
-npx prisma migrate dev --name init
+npx prisma migrate dev   # Apply the migrations
+
+npx prisma generate   # Generate the Prisma Client
 ```
 
 5- Run the application:
