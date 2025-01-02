@@ -88,7 +88,7 @@ npm start
   - `POST /api/v1/note/create-note` - Create a new note
   - `GET /api/v1/note/get-notes` - Get all notes (paginated)
   - `GET /api/v1/note/get-note/:id` - Get a specific note
-  - `GET /api/v1/note/search-notes` - Search notes
+  - `GET /api/v1/note/search-notes` - Search notes (paginated)
   - `PUT /api/v1/note/update-note/:id` - Update a note
   - `DELETE /api/v1/note/delete-note/:id` - Delete a note
   
