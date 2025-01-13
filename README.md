@@ -1,5 +1,16 @@
 # Express TypeScript Backend with Prisma
 
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)](https://jwt.io/)
+[![bcrypt](https://img.shields.io/badge/bcrypt-003A70?style=for-the-badge&logo=lock&logoColor=white)](https://www.npmjs.com/package/bcryptjs)
+[![Express Validator](https://img.shields.io/badge/Express_Validator-7457C2?style=for-the-badge&logo=validator&logoColor=white)](https://express-validator.github.io/)
+[![Rate Limit](https://img.shields.io/badge/Rate_Limit-2EA44F?style=for-the-badge&logo=shield&logoColor=white)](https://www.npmjs.com/package/express-rate-limit)
+[![CORS](https://img.shields.io/badge/CORS-000000?style=for-the-badge&logo=cors&logoColor=white)](https://www.npmjs.com/package/cors)
+
 A robust REST API backend built with Express.js, TypeScript, and Prisma ORM featuring authentication and note management.
 
 ## Features
