@@ -31,8 +31,8 @@ A robust REST API backend built with Express.js, TypeScript, and Prisma ORM feat
 1- Clone the repository:
 
 ```bash
-git clone <repository-url>
-cd <project-directory>
+git clone https://github.com/KhaledSaeed18/Express-Notes-App-with-TypeScript-Prisma-PostgreSQL.git
+cd Express-Notes-App-with-TypeScript-Prisma-PostgreSQL
 ```
 
 2- Install dependencies:
