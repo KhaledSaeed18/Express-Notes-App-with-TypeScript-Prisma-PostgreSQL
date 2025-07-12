@@ -1,6 +1,15 @@
+/*
+    * src/validations/auth.validation.ts
+    * Validation middleware for authentication routes.
+    * This module exports validation functions for user signup and signin requests using express-validator.
+*/
+
 import { body } from 'express-validator';
 import { BLOCKED_DOMAINS, COMMON_PASSWORDS } from '../constants';
 
+// Validation for user signup
+// This validation checks the email format, ensures the password meets security requirements,
+// and checks for blocked email domains and common passwords
 export const signupValidation = () => {
     return [
         body('email')
@@ -33,6 +42,9 @@ export const signupValidation = () => {
     ];
 };
 
+// Validation for user signin
+// This validation checks that the email and password fields are provided and formatted correctly
+// It does not check for blocked domains or common passwords, as those are typically handled during signup
 export const signinValidation = () => {
     return [
         body('email')
