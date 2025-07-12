@@ -1,3 +1,9 @@
+/*
+    * src/utils/usernames
+    * Utility functions for generating usernames.
+    * This module exports functions to generate a username based on a base string or a random username.
+*/
+
 import crypto from 'crypto'
 import prisma from '../database/prismaClient'
 
