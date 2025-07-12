@@ -1,232 +1,150 @@
 import { NextFunction, Request, Response } from "express";
-import { validationResult } from "express-validator";
-import prisma from "../database/prismaClient";
-import { errorHandler } from "../utils";
+import { AppError } from "../errors";
+import { INoteService } from "../services";
+import { BaseController } from "./base.controller";
 
-export const createNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return next(errorHandler(400, errors.array().map(err => err.msg)));
+export interface INoteController {
+    createNote(req: Request, res: Response, next: NextFunction): Promise<void>;
+    getNotes(req: Request, res: Response, next: NextFunction): Promise<void>;
+    searchNotes(req: Request, res: Response, next: NextFunction): Promise<void>;
+    getNote(req: Request, res: Response, next: NextFunction): Promise<void>;
+    updateNote(req: Request, res: Response, next: NextFunction): Promise<void>;
+    deleteNote(req: Request, res: Response, next: NextFunction): Promise<void>;
+}
+
+export class NoteController extends BaseController implements INoteController {
+    private noteService: INoteService;
+
+    constructor(noteService: INoteService) {
+        super();
+        this.noteService = noteService;
     }
 
-    const id = req.user?.userId;
-    if (!id) {
-        return next(errorHandler(401, 'Unauthorized'));
-    }
+    public createNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            if (!this.handleValidationErrors(req, next)) return;
 
-    const {
-        title,
-        content
-    } = req.body;
+            const userId = this.getUserId(req, next);
+            if (!userId) return;
 
-    try {
-        const note = await prisma.note.create({
-            data: {
-                title,
-                content,
-                userId: id
-            }
-        });
+            const { title, content } = req.body;
 
-        res.status(201).json({
-            statusCode: "201",
-            message: "Note created",
-            data: {
-                id: note.id,
-                title: note.title,
-                content: note.content,
-            }
-        });
+            const note = await this.noteService.createNote(userId, { title, content });
 
-    } catch (error: unknown) {
-        next(error instanceof Error
-            ? errorHandler(500, `Internal Server Error, ${error.message}`)
-            : errorHandler(500, 'An unknown error occurred'));
-    }
-};
-
-export const getNotes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const id = req.user?.userId;
-    if (!id) {
-        return next(errorHandler(401, 'Unauthorized'));
-    }
-
-    try {
-        if (!req.pagination) {
-            return next(errorHandler(500, 'Pagination middleware not configured'));
+            this.sendResponse(res, 201, "Note created successfully", note);
+        } catch (error) {
+            this.handleError(error, next);
         }
+    };
 
-        const result = await req.pagination.getPaginationResult(
-            prisma.note,
-            {
-                where: {
-                    userId: id
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
-            }
-        );
+    public getNotes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const userId = this.getUserId(req, next);
+            if (!userId) return;
 
-        if (!result?.data || result.data.length === 0) {
-            return next(errorHandler(404, 'No Notes found'));
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const skip = (page - 1) * limit;
+
+            const result = await this.noteService.getUserNotes(userId, { skip, take: limit });
+
+            this.sendPaginatedResponse(res, 200, "Notes retrieved successfully", result.data, {
+                currentPage: result.page,
+                totalPages: result.totalPages,
+                totalItems: result.total,
+                itemsPerPage: result.limit,
+                hasNext: result.page ? result.page < result.totalPages! : false,
+                hasPrev: result.page ? result.page > 1 : false,
+            });
+        } catch (error) {
+            this.handleError(error, next);
         }
+    };
 
-        res.json({
-            statusCode: "200",
-            message: "Notes retrieved",
-            ...result,
-        });
-    } catch (error: unknown) {
-        next(error instanceof Error
-            ? errorHandler(500, `Internal Server Error, ${error.message}`)
-            : errorHandler(500, 'An unknown error occurred'));
-    }
-};
+    public searchNotes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const userId = this.getUserId(req, next);
+            if (!userId) return;
 
-export const searchNotes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const id = req.user?.userId;
-    if (!id) {
-        return next(errorHandler(401, 'Unauthorized'));
-    }
+            const query = req.query.q as string;
+            if (!query) {
+                return next(new AppError('Search query is required', 400));
+            }
 
-    const query = req.query.q as string;
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const skip = (page - 1) * limit;
 
-    try {
-        if (!req.pagination) {
-            return next(errorHandler(500, 'Pagination middleware not configured'));
+            const result = await this.noteService.searchUserNotes(userId, query, { skip, take: limit });
+
+            this.sendPaginatedResponse(res, 200, "Notes search completed successfully", result.data, {
+                currentPage: result.page,
+                totalPages: result.totalPages,
+                totalItems: result.total,
+                itemsPerPage: result.limit,
+                hasNext: result.page ? result.page < result.totalPages! : false,
+                hasPrev: result.page ? result.page > 1 : false,
+            });
+        } catch (error) {
+            this.handleError(error, next);
         }
+    };
 
-        const result = await req.pagination.getPaginationResult(
-            prisma.note,
-            {
-                where: {
-                    userId: id,
-                    ...(query && {
-                        OR: [
-                            { title: { contains: query, mode: 'insensitive' } },
-                            { content: { contains: query, mode: 'insensitive' } }
-                        ]
-                    })
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
+    public getNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const userId = this.getUserId(req, next);
+            if (!userId) return;
+
+            const noteId = req.params.id;
+            if (!noteId) {
+                return next(new AppError('Note ID is required', 400));
             }
-        );
 
-        if (!result?.data || result.data.length === 0) {
-            return next(errorHandler(404, 'No Notes found'));
+            const note = await this.noteService.getNoteById(userId, noteId);
+
+            this.sendResponse(res, 200, "Note retrieved successfully", note);
+        } catch (error) {
+            this.handleError(error, next);
         }
+    };
 
-        res.json({
-            statusCode: "200",
-            message: "Notes retrieved",
-            ...result,
-        });
-    } catch (error: unknown) {
-        next(error instanceof Error
-            ? errorHandler(500, `Internal Server Error, ${error.message}`)
-            : errorHandler(500, 'An unknown error occurred'));
-    }
-};
+    public updateNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            if (!this.handleValidationErrors(req, next)) return;
 
-export const getNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const id = req.user?.userId;
-    if (!id) {
-        return next(errorHandler(401, 'Unauthorized'));
-    }
+            const userId = this.getUserId(req, next);
+            if (!userId) return;
 
-    const noteId = req.params.id;
-
-    try {
-        const note = await prisma.note.findUnique({
-            where: {
-                id: noteId
+            const noteId = req.params.id;
+            if (!noteId) {
+                return next(new AppError('Note ID is required', 400));
             }
-        });
 
-        if (!note) {
-            return next(errorHandler(404, 'Note not found'));
+            const { title, content } = req.body;
+
+            const note = await this.noteService.updateNote(userId, noteId, { title, content });
+
+            this.sendResponse(res, 200, "Note updated successfully", note);
+        } catch (error) {
+            this.handleError(error, next);
         }
+    };
 
-        res.json({
-            statusCode: "200",
-            message: "Note retrieved",
-            data: note
-        });
+    public deleteNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const userId = this.getUserId(req, next);
+            if (!userId) return;
 
-    } catch (error: unknown) {
-        next(error instanceof Error
-            ? errorHandler(500, `Internal Server Error, ${error.message}`)
-            : errorHandler(500, 'An unknown error occurred'));
-    }
-};
-
-export const updateNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return next(errorHandler(400, errors.array().map(err => err.msg)));
-    }
-
-    const id = req.user?.userId;
-    if (!id) {
-        return next(errorHandler(401, 'Unauthorized'));
-    }
-
-    const noteId = req.params.id;
-    const {
-        title,
-        content
-    } = req.body;
-
-    try {
-        const note = await prisma.note.update({
-            where: {
-                id: noteId
-            },
-            data: {
-                title,
-                content
+            const noteId = req.params.id;
+            if (!noteId) {
+                return next(new AppError('Note ID is required', 400));
             }
-        });
 
-        res.json({
-            statusCode: "200",
-            message: "Note updated",
-            data: note
-        });
+            const note = await this.noteService.deleteNote(userId, noteId);
 
-    } catch (error: unknown) {
-        next(error instanceof Error
-            ? errorHandler(500, `Internal Server Error, ${error.message}`)
-            : errorHandler(500, 'An unknown error occurred'));
-    }
-};
-
-export const deleteNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const id = req.user?.userId;
-    if (!id) {
-        return next(errorHandler(401, 'Unauthorized'));
-    }
-
-    const noteId = req.params.id;
-
-    try {
-        await prisma.note.delete({
-            where: {
-                id: noteId
-            }
-        });
-
-        res.json({
-            statusCode: "200",
-            message: `Note with id ${noteId} deleted`
-        });
-
-    } catch (error: unknown) {
-        next(error instanceof Error
-            ? errorHandler(500, `Internal Server Error, ${error.message}`)
-            : errorHandler(500, 'An unknown error occurred'));
-    }
-};
+            this.sendResponse(res, 200, "Note deleted successfully", note);
+        } catch (error) {
+            this.handleError(error, next);
+        }
+    };
+}

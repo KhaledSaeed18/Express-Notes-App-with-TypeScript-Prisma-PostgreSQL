@@ -1,16 +1,47 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { AppError, ValidationError } from '../errors';
 
-interface CustomError extends Error {
-    statusCode?: number;
-}
+const errorMiddleware = (err: Error, _req: Request, res: Response, _next: NextFunction): void => {
+    let statusCode = 500;
+    let message = 'Internal Server Error';
+    let errors: any = undefined;
 
-const errorMiddleware = (err: CustomError, _req: Request, res: Response): void => {
-    const statusCode = err.statusCode || 500;
-    const message = err.message || 'Internal Server Error';
-    res.status(statusCode).json({
+    if (err instanceof ValidationError) {
+        statusCode = err.statusCode;
+        message = err.message;
+        errors = err.errors;
+    } else if (err instanceof AppError) {
+        statusCode = err.statusCode;
+        message = err.message;
+    } else if (err.name === 'ValidationError') {
+        statusCode = 400;
+        message = err.message;
+    } else if (err.name === 'CastError') {
+        statusCode = 400;
+        message = 'Invalid ID format';
+    } else if (err.name === 'MongoError' || err.name === 'PrismaClientKnownRequestError') {
+        statusCode = 400;
+        message = 'Database operation failed';
+    } else if (err.name === 'JsonWebTokenError') {
+        statusCode = 401;
+        message = 'Invalid token';
+    } else if (err.name === 'TokenExpiredError') {
+        statusCode = 401;
+        message = 'Token expired';
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+        console.error('Error:', err);
+    }
+
+    const response: any = {
         statusCode,
         message,
-    });
+        ...(errors && { errors }),
+        ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
+    };
+
+    res.status(statusCode).json(response);
 };
 
 export default errorMiddleware;

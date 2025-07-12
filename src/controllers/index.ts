@@ -1,2 +1,3 @@
-export { signUp, signIn, refreshAccessToken, logout } from './auth.controller';
-export { createNote, getNotes, getNote, updateNote, deleteNote, searchNotes } from './note.controller';
+export { BaseController } from './base.controller';
+export { AuthController, type IAuthController } from './auth.controller';
+export { NoteController, type INoteController } from './note.controller';

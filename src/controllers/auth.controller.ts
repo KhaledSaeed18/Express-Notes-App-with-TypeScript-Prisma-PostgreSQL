@@ -1,171 +1,92 @@
 import { NextFunction, Request, Response } from "express";
-import bcrypt from "bcryptjs";
-import { validationResult } from "express-validator";
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
-import { errorHandler, generateAccessToken, generateRefreshToken, generateUniqueUsername } from "../utils";
-import prisma from "../database/prismaClient";
+import { AppError } from "../errors";
+import { IAuthService } from "../services";
+import { BaseController } from "./base.controller";
 
-export const signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-        return next(errorHandler(400, errors.array().map(err => err.msg)))
-    }
-
-    const { email, password } = req.body
-
-    try {
-        const userExists = await prisma.user.findUnique({ where: { email } })
-        if (userExists) {
-            return next(errorHandler(400, 'User already exists'))
-        }
-
-        const emailPrefix = email.split('@')[0]
-        const username = await generateUniqueUsername(emailPrefix)
-
-        const hashedPassword = await bcrypt.hash(password, 10)
-
-        const user = await prisma.user.create({
-            data: {
-                email,
-                username,
-                password: hashedPassword,
-            },
-        })
-
-        res.status(201).json({
-            statusCode: '201',
-            message: 'User created',
-            data: {
-                id: user.id,
-                email: user.email,
-                username: user.username,
-            },
-        })
-    } catch (error: unknown) {
-        next(
-            error instanceof Error
-                ? errorHandler(500, `Internal Server Error, ${error.message}`)
-                : errorHandler(500, 'An unknown error occurred')
-        )
-    }
+export interface IAuthController {
+    signUp(req: Request, res: Response, next: NextFunction): Promise<void>;
+    signIn(req: Request, res: Response, next: NextFunction): Promise<void>;
+    refreshAccessToken(req: Request, res: Response, next: NextFunction): Promise<void>;
+    logout(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
 
+export class AuthController extends BaseController implements IAuthController {
+    private authService: IAuthService;
 
-export const signIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return next(errorHandler(400, errors.array().map(err => err.msg)));
+    constructor(authService: IAuthService) {
+        super();
+        this.authService = authService;
     }
 
-    const {
-        email,
-        password
-    } = req.body;
+    public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            if (!this.handleValidationErrors(req, next)) return;
 
-    try {
-        const user = await prisma.user.findUnique({
-            where: {
-                email
-            }
-        });
+            const { email, password } = req.body;
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return next(errorHandler(401, 'Invalid credentials'));
+            const result = await this.authService.signUp({ email, password });
+
+            this.sendResponse(res, 201, 'User created successfully', result.user);
+        } catch (error) {
+            this.handleError(error, next);
         }
+    };
 
-        const accessToken = generateAccessToken(user.id.toString());
-        const refreshToken = generateRefreshToken(user.id.toString());
+    public signIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            if (!this.handleValidationErrors(req, next)) return;
 
-        res.cookie('accessToken', accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 15 * 60 * 1000 // 15 minutes
-        });
+            const { email, password } = req.body;
 
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 5 * 60 * 60 * 1000 // 5 hours
-        });
+            const result = await this.authService.signIn({ email, password });
 
-        res.json({
-            statusCode: "200",
-            message: "Sign in successful",
-            data: {
-                id: user.id,
-                email: user.email,
-                username: user.username
-            }
-        });
+            // Set cookies
+            this.setCookie(res, 'accessToken', result.accessToken!, 15 * 60 * 1000); // 15 minutes
+            this.setCookie(res, 'refreshToken', result.refreshToken!, 5 * 60 * 60 * 1000); // 5 hours
 
-    } catch (error: unknown) {
-        next(error instanceof Error
-            ? errorHandler(500, `Internal Server Error, ${error.message}`)
-            : errorHandler(500, 'An unknown error occurred'));
-    }
-};
-
-export const refreshAccessToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (!refreshToken) {
-        return next(errorHandler(401, 'Refresh token is required'));
-    }
-
-    if (typeof refreshToken !== 'string') {
-        return next(errorHandler(400, 'Invalid refresh token'));
-    }
-
-    try {
-        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as jwt.JwtPayload;
-
-        const newAccessToken = generateAccessToken(decoded.userId);
-
-        res.cookie('accessToken', newAccessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 15 * 60 * 1000 // 15 minutes
-        });
-
-        res.status(200).json({
-            statusCode: "200",
-            message: "Access token refreshed successfully"
-        });
-
-    } catch (error) {
-        if (error instanceof TokenExpiredError) {
-            return next(errorHandler(401, 'Unauthorized: Refresh token has expired'));
+            this.sendResponse(res, 200, "Sign in successful", result.user);
+        } catch (error) {
+            this.handleError(error, next);
         }
-        next(errorHandler(401, 'Unauthorized: Invalid token'));
-    }
-};
+    };
 
-export const logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        // Clear both access and refresh token cookies
-        res.clearCookie('accessToken', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        });
+    public refreshAccessToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const refreshToken = req.cookies.refreshToken;
 
-        res.clearCookie('refreshToken', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        });
+            if (!refreshToken) {
+                return next(new AppError('Refresh token is required', 401));
+            }
 
-        res.status(200).json({
-            statusCode: "200",
-            message: "Logged out successfully"
-        });
+            if (typeof refreshToken !== 'string') {
+                return next(new AppError('Invalid refresh token', 400));
+            }
 
-    } catch (error: unknown) {
-        next(error instanceof Error
-            ? errorHandler(500, `Internal Server Error, ${error.message}`)
-            : errorHandler(500, 'An unknown error occurred'));
-    }
-};
+            const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as jwt.JwtPayload;
+            const userId = decoded.id;
+
+            const result = await this.authService.refreshToken(userId);
+
+            this.setCookie(res, 'accessToken', result.accessToken, 15 * 60 * 1000); // 15 minutes
+
+            this.sendResponse(res, 200, "Token refreshed successfully", { accessToken: result.accessToken });
+        } catch (error) {
+            if (error instanceof TokenExpiredError) {
+                return next(new AppError('Refresh token expired', 401));
+            }
+            this.handleError(error, next);
+        }
+    };
+
+    public logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            this.clearCookie(res, 'accessToken');
+            this.clearCookie(res, 'refreshToken');
+
+            this.sendResponse(res, 200, "Logged out successfully");
+        } catch (error) {
+            this.handleError(error, next);
+        }
+    };
+}

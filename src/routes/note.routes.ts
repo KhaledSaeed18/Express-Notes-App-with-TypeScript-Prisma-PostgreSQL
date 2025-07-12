@@ -1,52 +1,68 @@
-import express from "express";
+import { INoteController } from "../controllers";
 import { noteLimiter, paginateResults, protect } from "../middleware";
 import { createNoteValidation, updateNoteValidation } from "../validations";
-import { createNote, deleteNote, getNote, getNotes, searchNotes, updateNote } from "../controllers";
+import { BaseRoute } from "./base.route";
 
-const noteRoutes = express.Router();
+export class NoteRoute extends BaseRoute {
+    private noteController!: INoteController;
 
-noteRoutes.post(
-    "/create-note",
-    noteLimiter,
-    protect,
-    createNoteValidation(),
-    createNote
-);
+    constructor() {
+        super();
+    }
 
-noteRoutes.get(
-    "/get-notes",
-    noteLimiter,
-    protect,
-    paginateResults,
-    getNotes
-);
-noteRoutes.get(
-    "/get-note/:id",
-    noteLimiter,
-    protect,
-    getNote
-);
-noteRoutes.get(
-    "/search-notes",
-    noteLimiter,
-    protect,
-    paginateResults,
-    searchNotes
-)
+    protected initializeRoutes(): void {
+        // Initialize the controller here, after the container is available
+        this.noteController = this.container.getNoteController();
+        this.router.post(
+            "/",
+            noteLimiter,
+            protect,
+            createNoteValidation(),
+            this.noteController.createNote
+        );
 
-noteRoutes.put(
-    "/update-note/:id",
-    noteLimiter,
-    protect,
-    updateNoteValidation(),
-    updateNote
-);
+        this.router.get(
+            "/",
+            noteLimiter,
+            protect,
+            paginateResults,
+            this.noteController.getNotes
+        );
 
-noteRoutes.delete(
-    "/delete-note/:id",
-    noteLimiter,
-    protect,
-    deleteNote
-);
+        this.router.get(
+            "/:id",
+            noteLimiter,
+            protect,
+            this.noteController.getNote
+        );
+
+        this.router.get(
+            "/search",
+            noteLimiter,
+            protect,
+            paginateResults,
+            this.noteController.searchNotes
+        );
+
+        this.router.put(
+            "/:id",
+            noteLimiter,
+            protect,
+            updateNoteValidation(),
+            this.noteController.updateNote
+        );
+
+        this.router.delete(
+            "/:id",
+            noteLimiter,
+            protect,
+            this.noteController.deleteNote
+        );
+    }
+}
+
+// Create instance and export router for backward compatibility
+const noteRoute = new NoteRoute();
+const noteRoutes = noteRoute.getRouter();
 
 export default noteRoutes;

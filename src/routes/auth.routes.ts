@@ -1,34 +1,48 @@
-import express from "express";
-import { signUp, signIn, refreshAccessToken, logout } from "../controllers";
+import { IAuthController } from "../controllers";
 import { signupValidation, signinValidation } from "../validations";
 import { authLimiter } from '../middleware';
+import { BaseRoute } from "./base.route";
 
-const authRoutes = express.Router();
+export class AuthRoute extends BaseRoute {
+    private authController!: IAuthController;
 
-authRoutes.post(
-    "/signup",
-    authLimiter,
-    signupValidation(),
-    signUp
-);
+    constructor() {
+        super();
+    }
 
-authRoutes.post(
-    "/signin",
-    authLimiter,
-    signinValidation(),
-    signIn
-);
+    protected initializeRoutes(): void {
+        // Initialize the controller here, after the container is available
+        this.authController = this.container.getAuthController();
+        this.router.post(
+            "/signup",
+            authLimiter,
+            signupValidation(),
+            this.authController.signUp
+        );
 
-authRoutes.post(
-    "/refresh-token",
-    authLimiter,
-    refreshAccessToken
-);
+        this.router.post(
+            "/signin",
+            authLimiter,
+            signinValidation(),
+            this.authController.signIn
+        );
 
-authRoutes.post(
-    "/logout",
-    authLimiter,
-    logout
-);
+        this.router.post(
+            "/refresh-token",
+            authLimiter,
+            this.authController.refreshAccessToken
+        );
+
+        this.router.post(
+            "/logout",
+            authLimiter,
+            this.authController.logout
+        );
+    }
+}
+
+// Create instance and export router for backward compatibility
+const authRoute = new AuthRoute();
+const authRoutes = authRoute.getRouter();
 
 export default authRoutes;
