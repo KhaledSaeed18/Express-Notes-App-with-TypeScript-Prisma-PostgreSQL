@@ -1,3 +1,9 @@
+/*
+    * src/index.ts
+    * Main entry point for the Express App server.
+    * This file sets up the Express application, middleware, routes, and error handling.
+*/
+
 import express from 'express';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
@@ -17,6 +23,7 @@ const corsOptions = {
     credentials: true,
 }
 
+// Middleware setup - including security, parsing and logging
 app.use(helmet());
 app.use(cors(corsOptions))
 app.use(express.json());
@@ -25,6 +32,7 @@ app.use(morgan('dev'));
 
 const port = process.env.PORT!;
 
+// Start the server
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
@@ -32,9 +40,11 @@ app.listen(port, () => {
 const version = process.env.API_VERSION!;
 const baseUrl = `${process.env.BASE_URL!}/${version}`;
 
+// Define routes
 app.use(`${baseUrl}/auth`, authRoutes);
 app.use(`${baseUrl}/note`, noteRoutes);
 
+// Wildcard route for handling 404 errors
 app.all('*', (req, res) => {
     res.status(404).json({
         statusCode: 404,
@@ -43,4 +53,5 @@ app.all('*', (req, res) => {
     })
 })
 
+// Error handling middleware
 app.use(errorMiddleware)
