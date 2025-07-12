@@ -41,4 +41,3 @@ export const COMMON_PASSWORDS = [
     'StarWars3!',
     'BaseBall4$'
 ];
-

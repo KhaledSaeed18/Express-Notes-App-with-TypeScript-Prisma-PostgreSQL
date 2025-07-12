@@ -17,13 +17,25 @@
     "prisma:db:seed": "npx prisma db seed",
     "prisma:validate": "npx prisma validate"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "keywords": [
     "express",
     "typescript",
     "prisma",
     "postgresql",
-    "notes",
-    "app"
+    "rates-limit",
+    "security",
+    "validation",
+    "authentication",
+    "jwt",
+    "bcrypt",
+    "cookie-parser",
+    "cors",
+    "helmet",
+    "morgan",
+    "notes-app"
   ],
   "license": "MIT",
   "description": "Simple and secure notes app built with Express.js, TypeScript, Prisma ORM, and PostgreSQL",
