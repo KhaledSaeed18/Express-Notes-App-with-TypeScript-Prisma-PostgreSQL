@@ -369,8 +369,8 @@ pnpm start
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/KhaledSaeed18/Express-Notes-App-with-TypeScript-Prisma-PostgreSQL.git
-   cd Express-Notes-App-with-TypeScript-Prisma-PostgreSQL
+   git clone https://github.com/KhaledSaeed18/node-express-boilerplate.git
+   cd node-express-boilerplate
    ```
 
 2. **Install dependencies**
