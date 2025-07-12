@@ -1,3 +1,9 @@
+/*
+    * src/controllers/note.controller.ts
+    * This file contains the NoteController class which handles requests related to notes.
+    * It includes methods for creating, retrieving, searching, updating, and deleting notes.
+*/
+
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors";
 import { INoteService } from "../services";
@@ -20,6 +26,10 @@ export class NoteController extends BaseController implements INoteController {
         this.noteService = noteService;
     }
 
+    /**
+     * Handles note creation.
+     * Validates the request, retrieves the user ID, and calls the noteService to create a new note.
+     */
     public createNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             if (!this.handleValidationErrors(req, next)) return;
@@ -37,6 +47,10 @@ export class NoteController extends BaseController implements INoteController {
         }
     };
 
+    /**
+     * Retrieves all notes for the authenticated user with pagination.
+     * Validates the request, retrieves the user ID, and calls the noteService to get notes.
+     */
     public getNotes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const userId = this.getUserId(req, next);
@@ -61,6 +75,10 @@ export class NoteController extends BaseController implements INoteController {
         }
     };
 
+    /**
+     * Searches for notes based on a query string.
+     * Validates the request, retrieves the user ID, and calls the noteService to search notes.
+     */
     public searchNotes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const userId = this.getUserId(req, next);
@@ -90,6 +108,10 @@ export class NoteController extends BaseController implements INoteController {
         }
     };
 
+    /**
+     * Retrieves a specific note by its ID.
+     * Validates the request, retrieves the user ID, and calls the noteService to get the note.
+     */
     public getNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const userId = this.getUserId(req, next);
@@ -108,6 +130,10 @@ export class NoteController extends BaseController implements INoteController {
         }
     };
 
+    /**
+     * Updates a specific note by its ID.
+     * Validates the request, retrieves the user ID, and calls the noteService to update the note.
+     */
     public updateNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             if (!this.handleValidationErrors(req, next)) return;
@@ -130,6 +156,10 @@ export class NoteController extends BaseController implements INoteController {
         }
     };
 
+    /**
+     * Deletes a specific note by its ID.
+     * Validates the request, retrieves the user ID, and calls the noteService to delete the note.
+     */
     public deleteNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const userId = this.getUserId(req, next);

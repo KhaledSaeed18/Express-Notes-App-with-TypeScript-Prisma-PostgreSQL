@@ -1,3 +1,10 @@
+/* 
+    * src/controllers/auth.controller.ts
+    * This file contains the AuthController class which handles user authentication operations.
+    * It includes methods for signing up, signing in, refreshing access tokens, and logging out.
+    * It uses the IAuthService interface to interact with the authentication service.
+*/
+
 import { NextFunction, Request, Response } from "express";
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { AppError } from "../errors";
@@ -19,6 +26,10 @@ export class AuthController extends BaseController implements IAuthController {
         this.authService = authService;
     }
 
+    /**
+     * Handles user sign-up.
+     * Validates the request, calls the authService to create a new user, and sends a response.
+     */
     public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             if (!this.handleValidationErrors(req, next)) return;
@@ -33,6 +44,10 @@ export class AuthController extends BaseController implements IAuthController {
         }
     };
 
+    /**
+     * Handles user sign-in.
+     * Validates the request, calls the authService to authenticate the user, and sets cookies for access and refresh tokens.
+     */
     public signIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             if (!this.handleValidationErrors(req, next)) return;
@@ -51,6 +66,10 @@ export class AuthController extends BaseController implements IAuthController {
         }
     };
 
+    /**
+     * Refreshes the access token using the refresh token stored in cookies.
+     * Validates the refresh token, calls the authService to refresh the token, and sets a new access token cookie.
+     */
     public refreshAccessToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const refreshToken = req.cookies.refreshToken;
@@ -79,6 +98,10 @@ export class AuthController extends BaseController implements IAuthController {
         }
     };
 
+    /**
+     * Logs out the user by clearing the access and refresh token cookies.
+     * Sends a response indicating successful logout.
+     */
     public logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             this.clearCookie(res, 'accessToken');
