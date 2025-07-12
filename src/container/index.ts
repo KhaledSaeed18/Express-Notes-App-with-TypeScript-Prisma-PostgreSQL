@@ -1,3 +1,9 @@
+/*
+    * src/container/index.ts
+    * This file implements the Dependency Injection Container for the application.
+    * It manages the instantiation and retrieval of repositories, services, and controllers.
+*/
+
 import { PrismaClient } from '@prisma/client';
 import { UserRepository, NoteRepository, type IUserRepository, type INoteRepository } from '../repository';
 import { AuthService, NoteService, type IAuthService, type INoteService } from '../services';
@@ -29,6 +35,10 @@ export class Container implements IContainer {
         this.initializeControllers();
     }
 
+    // Singleton pattern to ensure only one instance of Container is created
+    // This is useful for managing shared resources like PrismaClient
+    // and to avoid multiple instances of repositories, services, and controllers
+    // This method returns the existing instance or creates a new one if it doesn't exist
     public static getInstance(prisma: PrismaClient): Container {
         if (!Container.instance) {
             Container.instance = new Container(prisma);
@@ -36,10 +46,14 @@ export class Container implements IContainer {
         return Container.instance;
     }
 
+    // Method to reset the singleton instance
+    // This can be useful for testing purposes or when you need to reinitialize the container
     public static resetInstance(): void {
         Container.instance = null as any;
     }
 
+    // Private methods to initialize repositories, services, and controllers
+    // These methods are called in the constructor to set up the container
     private initializeRepositories(): void {
         this.userRepository = new UserRepository(this.prisma);
         this.noteRepository = new NoteRepository(this.prisma);

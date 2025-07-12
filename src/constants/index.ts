@@ -1,5 +1,5 @@
 /*
-    * constants/index.ts
+    * src/constants/index.ts
     * This file contains various constants used throughout the application.
 */
 
