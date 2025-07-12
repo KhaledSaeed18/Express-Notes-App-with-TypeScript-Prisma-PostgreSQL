@@ -1,4 +1,5 @@
 import express from 'express';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import cors from "cors";
 import { errorMiddleware } from './middleware';
@@ -14,6 +15,7 @@ const corsOptions = {
     credentials: true,
 }
 
+app.use(helmet());
 app.use(cors(corsOptions))
 app.use(express.json());
 
