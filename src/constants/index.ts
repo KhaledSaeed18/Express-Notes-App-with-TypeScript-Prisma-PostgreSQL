@@ -1,3 +1,10 @@
+/*
+    * constants/index.ts
+    * This file contains various constants used throughout the application.
+*/
+
+// List of blocked email domains
+// These domains are often used for temporary or disposable email addresses
 export const BLOCKED_DOMAINS = [
     'tempmail.com',
     'throwaway.com',
@@ -19,6 +26,8 @@ export const BLOCKED_DOMAINS = [
     'mailnesia.com'
 ];
 
+// Commonly used passwords that should be avoided
+// These passwords are often weak and easily guessable
 export const COMMON_PASSWORDS = [
     'Password123!',
     'Admin123!',
