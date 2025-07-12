@@ -2,31 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
-import crypto from 'crypto'
 import { errorHandler, generateAccessToken, generateRefreshToken } from "../utils";
 import prisma from "../database/prismaClient";
-
-function generateUsername(base?: string): string {
-    if (base) {
-        const sanitized = base.toLowerCase().replace(/[^a-z0-9]/g, '')
-        const suffix = crypto.randomInt(1000, 9999).toString()
-        return sanitized + suffix
-    }
-    return 'user' + crypto.randomInt(10000, 99999).toString()
-}
-
-async function generateUniqueUsername(base: string, maxAttempts = 5): Promise<string> {
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        const usernameCandidate = generateUsername(base)
-        const exists = await prisma.user.findUnique({
-            where: { username: usernameCandidate }
-        })
-        if (!exists) {
-            return usernameCandidate
-        }
-    }
-    throw new Error('Failed to generate unique username after several attempts')
-}
+import { generateUniqueUsername } from "../utils/usernames";
 
 export const signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors = validationResult(req)
