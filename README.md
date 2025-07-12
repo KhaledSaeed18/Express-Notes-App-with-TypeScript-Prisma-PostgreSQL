@@ -49,14 +49,14 @@ cd Express-Notes-App-with-TypeScript-Prisma-PostgreSQL
 2- Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 3- Create a .env file in the root directory:
 
 ```.env
 PORT=<port-number>
-API_VERSION=v1
+API_VERSION=v<X>
 BASE_URL=/api
 DATABASE_URL=postgresql://<username>:<password>@localhost:5432/<database-name>
 JWT_SECRET=your-jwt-secret-key
@@ -67,39 +67,41 @@ JWT_REFRESH_SECRET=your-jwt-refresh-secret-key
 
 ```bash
 npx prisma migrate dev   # Apply the migrations
+# or pnpm prisma:migrate
 
 npx prisma generate   # Generate the Prisma Client
+# or pnpm prisma:generate
 ```
 
 5- Run the application:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 6- Production Build:
 
 ```bash
-npm run build
-npm start
+pnpm build
+pnpm start
 ```
 
 ## API Endpoints
 
 ### Base URL
 
-`http://localhost:3000/api/v1`
+`http://localhost:<port-number>/api/v<X>`
 
 - Authentication:
-  - `POST /api/v1/auth/signup` - Register a new user
-  - `POST /api/v1/auth/signin` - Login user
-  - `POST /api/v1/auth/refresh-token` - Refresh access token
+  - `POST /api/v<X>/auth/signup` - Register a new user
+  - `POST /api/v<X>/auth/signin` - Login user
+  - `POST /api/v<X>/auth/refresh-token` - Refresh access token
 
 - Notes:
-  - `POST /api/v1/note/create-note` - Create a new note
-  - `GET /api/v1/note/get-notes` - Get all notes (paginated)
-  - `GET /api/v1/note/get-note/:id` - Get a specific note
-  - `GET /api/v1/note/search-notes` - Search notes (paginated)
-  - `PUT /api/v1/note/update-note/:id` - Update a note
-  - `DELETE /api/v1/note/delete-note/:id` - Delete a note
+  - `POST /api/v<X>/note/create-note` - Create a new note
+  - `GET /api/v<X>/note/get-notes` - Get all notes (paginated)
+  - `GET /api/v<X>/note/get-note/:id` - Get a specific note
+  - `GET /api/v<X>/note/search-notes` - Search notes (paginated)
+  - `PUT /api/v<X>/note/update-note/:id` - Update a note
+  - `DELETE /api/v<X>/note/delete-note/:id` - Delete a note
   

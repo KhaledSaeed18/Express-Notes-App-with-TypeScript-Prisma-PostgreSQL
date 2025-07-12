@@ -5,7 +5,17 @@
   "scripts": {
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "type-check": "tsc --noEmit",
+    "prisma:studio": "npx prisma studio",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev --name init",
+    "prisma:migrate:reset": "npx prisma migrate reset --force",
+    "prisma:migrate:deploy": "npx prisma migrate deploy",
+    "prisma:db:pull": "npx prisma db pull",
+    "prisma:db:push": "npx prisma db push",
+    "prisma:db:seed": "npx prisma db seed",
+    "prisma:validate": "npx prisma validate"
   },
   "keywords": [
     "express",
@@ -15,7 +25,6 @@
     "notes",
     "app"
   ],
-  "author": "",
   "license": "MIT",
   "description": "Simple and secure notes app built with Express.js, TypeScript, Prisma ORM, and PostgreSQL",
   "dependencies": {
