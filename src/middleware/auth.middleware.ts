@@ -10,7 +10,7 @@ declare global {
     }
 }
 
-export const protect = (req: Request, res: Response, next: NextFunction): void => {
+export const protect = (req: Request, _res: Response, next: NextFunction): void => {
     const authHeader = req.headers['authorization'];
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return next(errorHandler(403, 'Access denied: invalid token format'));

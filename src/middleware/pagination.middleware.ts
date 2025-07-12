@@ -32,7 +32,7 @@ export interface PaginationResult<T> {
 
 export const paginateResults = (
     req: Request,
-    res: Response,
+    _res: Response,
     next: NextFunction
 ): void => {
     const page = parseInt(req.query.page as string) || 1;

@@ -3,12 +3,6 @@ import { validationResult } from "express-validator";
 import prisma from "../database/prismaClient";
 import { errorHandler } from "../utils";
 
-interface INote {
-    id: string;
-    title: string;
-    content: string;
-}
-
 export const createNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
