@@ -1,3 +1,9 @@
+/*
+    * BaseRepository class for generic database operations
+    * This class provides methods for checking existence, counting records,
+    * and finding records with pagination.
+*/
+
 import { PrismaClient } from '@prisma/client';
 import { PaginationParams } from '../types';
 
@@ -8,9 +14,7 @@ export abstract class BaseRepository {
         this.prisma = prisma;
     }
 
-    /**
-     * Generic method to check if a record exists
-     */
+    // Generic method to check if a record exists
     protected async exists(model: any, where: any): Promise<boolean> {
         const record = await model.findFirst({
             where,
@@ -19,16 +23,12 @@ export abstract class BaseRepository {
         return record !== null;
     }
 
-    /**
-     * Generic method to count records
-     */
+    // Generic method to count records
     protected async count(model: any, where?: any): Promise<number> {
         return await model.count({ where });
     }
 
-    /**
-     * Generic method to find many with pagination
-     */
+    // Generic method to find many with pagination
     protected async findManyWithPagination<T>(
         model: any,
         where?: any,
