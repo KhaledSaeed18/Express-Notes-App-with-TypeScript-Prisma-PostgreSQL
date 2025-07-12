@@ -1,4 +1,5 @@
 import { body } from 'express-validator';
+import { BLOCKED_DOMAINS, COMMON_PASSWORDS } from '../constants';
 
 export const signupValidation = () => {
     return [
@@ -7,7 +8,7 @@ export const signupValidation = () => {
             .isEmail().withMessage('Invalid email format')
             .normalizeEmail()
             .custom(async (email) => {
-                const blockedDomains = ['tempmail.com', 'throwaway.com'];
+                const blockedDomains = BLOCKED_DOMAINS;
                 const domain = email.split('@')[1];
                 if (blockedDomains.includes(domain)) {
                     throw new Error('Email domain not allowed');
@@ -23,12 +24,7 @@ export const signupValidation = () => {
             .matches(/\d/).withMessage('Password must contain at least one number')
             .matches(/[\W_]/).withMessage('Password must contain at least one special character')
             .custom((value) => {
-                const commonPasswords = [
-                    'Password123!',
-                    'Admin123!',
-                    'P@ssw0rd2024',
-                    'P@ssw0rd2025',
-                ];
+                const commonPasswords = COMMON_PASSWORDS;
                 if (commonPasswords.includes(value)) {
                     throw new Error('Password is too common');
                 }
