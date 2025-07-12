@@ -1,3 +1,9 @@
+/*
+    * src/middleware/pagination.middleware.ts
+    * Middleware for handling pagination in API responses.
+    * This middleware extracts pagination parameters from the request and provides a method to fetch paginated results from a Prisma model.
+*/
+
 import { Request, Response, NextFunction } from 'express';
 
 declare global {
@@ -30,6 +36,9 @@ export interface PaginationResult<T> {
     };
 }
 
+// Middleware to handle pagination
+// Extracts page and limit from query parameters
+// Adds a method to the request object to fetch paginated results from a Prisma model
 export const paginateResults = (
     req: Request,
     _res: Response,

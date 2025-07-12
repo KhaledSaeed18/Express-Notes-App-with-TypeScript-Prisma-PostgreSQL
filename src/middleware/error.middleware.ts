@@ -1,3 +1,9 @@
+/*
+    * src/middleware/error.middleware.ts
+    * Middleware for handling errors in the Express application.
+    * This middleware captures errors thrown in the application and formats them into a consistent response structure.
+*/
+
 import { Request, Response, NextFunction } from 'express';
 import { AppError, ValidationError } from '../errors';
 
@@ -34,6 +40,8 @@ const errorMiddleware = (err: Error, _req: Request, res: Response, _next: NextFu
         console.error('Error:', err);
     }
 
+    // Construct the response object
+    // Include stack trace in non-production environments for debugging
     const response: any = {
         statusCode,
         message,

@@ -1,6 +1,15 @@
+/*
+    * src/middleware/limiter.middleware.ts
+    * Middleware for rate limiting API requests.
+    * This middleware limits the number of requests to specific routes to prevent abuse.
+*/
+
 import rateLimit from 'express-rate-limit';
 import { Request } from 'express';
 
+// Function to create a rate limiter
+// Accepts parameters for the time window, maximum requests, and error message
+// Returns a configured rate limiter middleware
 export const createRateLimiter = (windowMs: number, max: number, message: string) => {
     return rateLimit({
         windowMs,
@@ -18,6 +27,9 @@ export const createRateLimiter = (windowMs: number, max: number, message: string
     });
 };
 
+// Rate limiters for specific routes
+// These limiters can be applied to authentication and note operations
+// They define the time window and maximum number of requests allowed
 export const authLimiter = createRateLimiter(
     15 * 60 * 1000, // 15 minutes
     5,

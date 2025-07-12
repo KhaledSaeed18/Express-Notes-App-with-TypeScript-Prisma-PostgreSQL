@@ -1,3 +1,9 @@
+/*
+    * src/middleware/auth.middleware.ts
+    * Middleware for protecting routes by verifying JWT tokens.
+    * This middleware checks for a valid JWT token in the request headers or cookies.
+*/
+
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import { errorHandler } from '../utils';
@@ -10,6 +16,10 @@ declare global {
     }
 }
 
+// Middleware to protect routes
+// Checks for a JWT token in the request cookies or Authorization header
+// If the token is valid, it decodes the user information and attaches it to the request object
+// If the token is missing or invalid, it returns an error response
 export const protect = (req: Request, _res: Response, next: NextFunction): void => {
     let token = req.cookies.accessToken;
 
