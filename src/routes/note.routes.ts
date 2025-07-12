@@ -1,3 +1,11 @@
+/*
+    * NoteRoute class for defining routes related to notes.
+    * This class extends BaseRoute and initializes routes for creating, retrieving,
+    * updating, and deleting notes. 
+    * It uses middleware for rate limiting, pagination, and authentication.
+    * It is used to set up note-related routes in the application.
+*/
+
 import { INoteController } from "../controllers";
 import { noteLimiter, paginateResults, protect } from "../middleware";
 import { createNoteValidation, updateNoteValidation } from "../validations";
@@ -13,6 +21,7 @@ export class NoteRoute extends BaseRoute {
     protected initializeRoutes(): void {
         // Initialize the controller here, after the container is available
         this.noteController = this.container.getNoteController();
+
         this.router.post(
             "/",
             noteLimiter,

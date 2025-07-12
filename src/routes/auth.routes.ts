@@ -1,3 +1,8 @@
+/*
+    * src/routes/auth.routes.ts
+    * This file defines the authentication routes for user signup, signin, token refresh, and logout.
+*/
+
 import { IAuthController } from "../controllers";
 import { signupValidation, signinValidation } from "../validations";
 import { authLimiter } from '../middleware';
@@ -13,6 +18,7 @@ export class AuthRoute extends BaseRoute {
     protected initializeRoutes(): void {
         // Initialize the controller here, after the container is available
         this.authController = this.container.getAuthController();
+
         this.router.post(
             "/signup",
             authLimiter,
