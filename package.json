@@ -1,6 +1,8 @@
 {
   "name": "notes-app-backend",
   "version": "1.0.0",
+  "license": "MIT",
+  "description": "Simple and secure notes app built with Express.js, TypeScript, Prisma ORM, and PostgreSQL",
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",
@@ -37,8 +39,6 @@
     "morgan",
     "notes-app"
   ],
-  "license": "MIT",
-  "description": "Simple and secure notes app built with Express.js, TypeScript, Prisma ORM, and PostgreSQL",
   "dependencies": {
     "@prisma/client": "^6.11.1",
     "bcryptjs": "^2.4.3",

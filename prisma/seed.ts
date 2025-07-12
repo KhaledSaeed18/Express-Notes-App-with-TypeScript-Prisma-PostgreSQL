@@ -1,14 +1,22 @@
+/*
+    * prisma/seed.ts
+    * It seeds the database with initial data for development and testing.
+    * This file creates a demo user and populates the database with sample notes.
+    *
+*/
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('🌱 Starting database seeding...');
+    console.log('Starting database seeding...');
 
-    // Create a demo user first
+    // 1- Create a demo user
+    // Demo user hashed password
     const hashedPassword = await bcrypt.hash('DemoUser123!', 10);
 
+    // Create a demo user in the database
     const demoUser = await prisma.user.upsert({
         where: { email: 'demo@example.com' },
         update: {},
@@ -19,7 +27,7 @@ async function main() {
         },
     });
 
-    console.log('✅ Demo user created:', demoUser.email);
+    console.log('Demo user created:', demoUser.email);
 
     // Sample notes data
     const notesData = [
@@ -85,9 +93,11 @@ async function main() {
         },
     ];
 
-    // Create notes for the demo user
-    console.log('🗒️  Creating sample notes...');
+    // 2- Create notes for the demo user
+    console.log('Creating sample notes...');
 
+    // Map through notesData and create each note
+    // Using upsert to avoid duplicates based on title
     for (const noteData of notesData) {
         const note = await prisma.note.upsert({
             where: {
@@ -101,16 +111,17 @@ async function main() {
             },
         });
 
-        console.log(`✅ Created note: ${note.title}`);
+        console.log(`Created note: ${note.title}`);
     }
 
-    console.log('🎉 Database seeding completed successfully!');
-    console.log(`📊 Summary:`);
-    console.log(`   • 1 user created (${demoUser.email})`);
-    console.log(`   • ${notesData.length} notes created`);
-    console.log(`\n🔐 Demo login credentials:`);
-    console.log(`   Email: demo@example.com`);
-    console.log(`   Password: DemoUser123!`);
+    // Final message after seeding
+    console.log('Database seeding completed successfully!');
+    console.log(`Summary:`);
+    console.log(`1 user created (${demoUser.email})`);
+    console.log(`${notesData.length} notes created`);
+    console.log(`\n Demo login credentials:`);
+    console.log(`Email: demo@example.com`);
+    console.log(`Password: DemoUser123!`);
 }
 
 main()
@@ -118,7 +129,7 @@ main()
         await prisma.$disconnect();
     })
     .catch(async (e) => {
-        console.error('❌ Error during seeding:', e);
+        console.error('Error during seeding:', e);
         await prisma.$disconnect();
         process.exit(1);
     });
