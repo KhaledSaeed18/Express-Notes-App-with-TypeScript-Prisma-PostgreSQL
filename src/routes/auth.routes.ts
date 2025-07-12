@@ -11,27 +11,27 @@ import {
 } from "../validations/auth.validation";
 import { authLimiter } from '../middleware/limiter.middleware';
 
-const router = express.Router();
+const authRouter = express.Router();
 
-router.post(
+authRouter.post(
     "/signup",
     authLimiter,
     signupValidation(),
     signUp
 );
 
-router.post(
+authRouter.post(
     "/signin",
     authLimiter,
     signinValidation(),
     signIn
 );
 
-router.post(
+authRouter.post(
     "/refresh-token",
     authLimiter,
     refreshAccessTokenValidation(),
     refreshAccessToken
-)
+);
 
-export default router;
+export default authRouter;

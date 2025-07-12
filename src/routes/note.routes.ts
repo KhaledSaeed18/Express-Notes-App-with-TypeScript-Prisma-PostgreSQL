@@ -15,9 +15,9 @@ import {
 import { noteLimiter } from "../middleware/limiter.middleware";
 import { paginateResults } from "../middleware/pagination.middleware";
 
-const router = express.Router();
+const noteRoutes = express.Router();
 
-router.post(
+noteRoutes.post(
     "/create-note",
     noteLimiter,
     protect,
@@ -25,20 +25,20 @@ router.post(
     createNote
 );
 
-router.get(
+noteRoutes.get(
     "/get-notes",
     noteLimiter,
     protect,
     paginateResults,
     getNotes
 );
-router.get(
+noteRoutes.get(
     "/get-note/:id",
     noteLimiter,
     protect,
     getNote
 );
-router.get(
+noteRoutes.get(
     "/search-notes",
     noteLimiter,
     protect,
@@ -46,7 +46,7 @@ router.get(
     searchNotes
 )
 
-router.put(
+noteRoutes.put(
     "/update-note/:id",
     noteLimiter,
     protect,
@@ -54,11 +54,11 @@ router.put(
     updateNote
 );
 
-router.delete(
+noteRoutes.delete(
     "/delete-note/:id",
     noteLimiter,
     protect,
     deleteNote
 );
 
-export default router;
+export default noteRoutes;
