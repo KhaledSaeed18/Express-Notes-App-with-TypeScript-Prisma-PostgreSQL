@@ -1,6 +1,5 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
 import cors from "cors";
 import errorMiddleware from './middleware/error.middleware';
 
@@ -9,10 +8,15 @@ import noteRoutes from "./routes/note.routes";
 
 dotenv.config();
 
-
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+    origin: [process.env.CLIENT_URL!],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    credentials: true,
+}
+
+app.use(cors(corsOptions))
 app.use(express.json());
 
 const port = process.env.PORT!;
