@@ -1,3 +1,11 @@
+/*
+    * AuthService class for handling user authentication.
+    * It provides methods for signing up, signing in, refreshing tokens, and validating users.
+    * It uses bcrypt for password hashing and JWT for token generation.
+    * It interacts with the IUserRepository to perform database operations.
+    * It throws specific errors for validation, authentication, and conflict scenarios.
+*/
+
 import bcrypt from 'bcryptjs';
 import { User } from '@prisma/client';
 import { IUserRepository } from '../repository';
@@ -15,6 +23,11 @@ export interface IAuthService {
 export class AuthService implements IAuthService {
     constructor(private userRepository: IUserRepository) { }
 
+    /**
+     * Signs up a new user.
+     * Validates input, checks for existing user, hashes password, and creates user.
+     * Returns user data in AuthResponseDTO format.
+     */
     async signUp(data: SignUpDTO): Promise<AuthResponseDTO> {
         const { email, password } = data;
 
@@ -22,7 +35,6 @@ export class AuthService implements IAuthService {
         if (!email || !password) {
             throw new ValidationError('Email and password are required');
         }
-
         if (password.length < 8) {
             throw new ValidationError('Password must be at least 8 characters long');
         }
@@ -52,6 +64,10 @@ export class AuthService implements IAuthService {
         return { user: userResponse };
     }
 
+    /**
+     * Signs in a user.
+     * Validates input, checks credentials, generates tokens, and returns user data.
+     */
     async signIn(data: SignInDTO): Promise<AuthResponseDTO> {
         const { email, password } = data;
 
@@ -85,33 +101,52 @@ export class AuthService implements IAuthService {
         };
     }
 
+    /**
+     * Refreshes the access token for a user.
+     * Validates user ID, checks if user exists, and generates a new access token.
+     */
     async refreshToken(userId: string): Promise<{ accessToken: string }> {
+
+        // Validate user ID
         if (!userId) {
             throw new ValidationError('User ID is required');
         }
 
+        // Check if user exists
         const user = await this.userRepository.findById(userId);
         if (!user) {
             throw new NotFoundError('User not found');
         }
 
+        // Generate new access token and return it
         const accessToken = generateAccessToken(userId);
         return { accessToken };
     }
 
+    /**
+     * Validates a user by ID.
+     * Checks if user exists and returns user data in UserResponseDTO format.
+     */
     async validateUser(userId: string): Promise<UserResponseDTO> {
+        // Validate user ID
         if (!userId) {
             throw new ValidationError('User ID is required');
         }
 
+        // Check if user exists
         const user = await this.userRepository.findById(userId);
         if (!user) {
             throw new NotFoundError('User not found');
         }
 
+        // Convert to response DTO
         return this.toUserResponseDTO(user);
     }
 
+    /**
+     * Converts a User entity to UserResponseDTO format.
+     * Used for consistent response structure.
+     */
     private toUserResponseDTO(user: User): UserResponseDTO {
         return {
             id: user.id,
