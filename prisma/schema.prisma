@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,13 +8,17 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(cuid()) // This is a custom ID field example:cm5fpxdrp0000vk8c8fwn69qx
+  id       String @id @default(cuid())
+  username String @unique
   email    String @unique
   password String
-  notes    Note[] // This is the relation between the User and Note where user can have many notes
+  notes    Note[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@map("users")
 }
 
 model Note {
@@ -28,12 +26,13 @@ model Note {
   title   String
   content String
 
-  userId String // This is a forgein key
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id]) // This is the relation between the User and Note
-
-  @@index([userId]) // This is an index for the userId used for fast queries on the database
+  @@index([userId])
+  @@index([title])
+  @@map("notes")
 }
