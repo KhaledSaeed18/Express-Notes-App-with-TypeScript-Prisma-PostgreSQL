@@ -1,12 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
-import { PrismaClient } from "@prisma/client";
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import crypto from 'crypto'
 import { errorHandler, generateAccessToken, generateRefreshToken } from "../utils";
-
-const prisma = new PrismaClient();
+import prisma from "../database/prismaClient";
 
 function generateUsername(base?: string): string {
     if (base) {

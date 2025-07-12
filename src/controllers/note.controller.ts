@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../database/prismaClient";
 import { errorHandler } from "../utils";
 
 interface INote {
@@ -8,8 +8,6 @@ interface INote {
     title: string;
     content: string;
 }
-
-const prisma = new PrismaClient();
 
 export const createNote = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors = validationResult(req);
