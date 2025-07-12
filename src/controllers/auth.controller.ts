@@ -5,56 +5,77 @@ import { PrismaClient } from "@prisma/client";
 import { errorHandler } from "../utils/error";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken";
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
+import crypto from 'crypto'
 
 const prisma = new PrismaClient();
 
+function generateUsername(base?: string): string {
+    if (base) {
+        const sanitized = base.toLowerCase().replace(/[^a-z0-9]/g, '')
+        const suffix = crypto.randomInt(1000, 9999).toString()
+        return sanitized + suffix
+    }
+    return 'user' + crypto.randomInt(10000, 99999).toString()
+}
+
+async function generateUniqueUsername(base: string, maxAttempts = 5): Promise<string> {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const usernameCandidate = generateUsername(base)
+        const exists = await prisma.user.findUnique({
+            where: { username: usernameCandidate }
+        })
+        if (!exists) {
+            return usernameCandidate
+        }
+    }
+    throw new Error('Failed to generate unique username after several attempts')
+}
+
 export const signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const errors = validationResult(req);
+    const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        return next(errorHandler(400, errors.array().map(err => err.msg)));
+        return next(errorHandler(400, errors.array().map(err => err.msg)))
     }
 
-    const {
-        email,
-        password
-    } = req.body;
+    const { email, password } = req.body
 
     try {
-
-        const userExists = await prisma.user.findUnique({
-            where: {
-                email
-            }
-        });
-
+        const userExists = await prisma.user.findUnique({ where: { email } })
         if (userExists) {
-            return next(errorHandler(400, 'User already exists'));
+            return next(errorHandler(400, 'User already exists'))
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const emailPrefix = email.split('@')[0]
+        const username = await generateUniqueUsername(emailPrefix)
+
+        const hashedPassword = await bcrypt.hash(password, 10)
 
         const user = await prisma.user.create({
             data: {
                 email,
-                password: hashedPassword
-            }
-        });
+                username,
+                password: hashedPassword,
+            },
+        })
 
         res.status(201).json({
-            statusCode: "201",
-            message: "User created",
+            statusCode: '201',
+            message: 'User created',
             data: {
                 id: user.id,
                 email: user.email,
-            }
-        });
-
+                username: user.username,
+            },
+        })
     } catch (error: unknown) {
-        next(error instanceof Error
-            ? errorHandler(500, `Internal Server Error, ${error.message}`)
-            : errorHandler(500, 'An unknown error occurred'));
+        next(
+            error instanceof Error
+                ? errorHandler(500, `Internal Server Error, ${error.message}`)
+                : errorHandler(500, 'An unknown error occurred')
+        )
     }
-};
+}
+
 
 export const signIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors = validationResult(req);
