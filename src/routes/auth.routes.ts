@@ -1,37 +1,29 @@
 import express from "express";
-import {
-    signUp,
-    signIn,
-    refreshAccessToken
-} from "../controllers/auth.controller";
-import {
-    signupValidation,
-    signinValidation,
-    refreshAccessTokenValidation
-} from "../validations/auth.validation";
-import { authLimiter } from '../middleware/limiter.middleware';
+import { signUp, signIn, refreshAccessToken } from "../controllers";
+import { signupValidation, signinValidation, refreshAccessTokenValidation } from "../validations";
+import { authLimiter } from '../middleware';
 
-const authRouter = express.Router();
+const authRoutes = express.Router();
 
-authRouter.post(
+authRoutes.post(
     "/signup",
     authLimiter,
     signupValidation(),
     signUp
 );
 
-authRouter.post(
+authRoutes.post(
     "/signin",
     authLimiter,
     signinValidation(),
     signIn
 );
 
-authRouter.post(
+authRoutes.post(
     "/refresh-token",
     authLimiter,
     refreshAccessTokenValidation(),
     refreshAccessToken
 );
 
-export default authRouter;
+export default authRoutes;

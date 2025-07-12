@@ -1,10 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from "cors";
-import errorMiddleware from './middleware/error.middleware';
-
-import authRoutes from "./routes/auth.routes";
-import noteRoutes from "./routes/note.routes";
+import { errorMiddleware } from './middleware';
+import { authRoutes, noteRoutes } from './routes';
 
 dotenv.config();
 

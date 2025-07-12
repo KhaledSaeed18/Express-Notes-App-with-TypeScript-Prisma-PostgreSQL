@@ -1,19 +1,7 @@
 import express from "express";
-import {
-    createNote,
-    getNote,
-    getNotes,
-    updateNote,
-    deleteNote,
-    searchNotes
-} from "../controllers/note.controller";
-import { protect } from "../middleware/auth.middleware";
-import {
-    createNoteValidation,
-    updateNoteValidation
-} from "../validations/note.validation";
-import { noteLimiter } from "../middleware/limiter.middleware";
-import { paginateResults } from "../middleware/pagination.middleware";
+import { noteLimiter, paginateResults, protect } from "../middleware";
+import { createNoteValidation, updateNoteValidation } from "../validations";
+import { createNote, deleteNote, getNote, getNotes, searchNotes, updateNote } from "../controllers";
 
 const noteRoutes = express.Router();
 

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload, TokenExpiredError } from 'jsonwebtoken';
-import { errorHandler } from '../utils/error';
+import { errorHandler } from '../utils';
 
 declare global {
     namespace Express {

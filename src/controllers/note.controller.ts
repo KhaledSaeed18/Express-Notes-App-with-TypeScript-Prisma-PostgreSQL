@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { PrismaClient } from "@prisma/client";
-import { errorHandler } from "../utils/error";
+import { errorHandler } from "../utils";
 
 interface INote {
     id: string;

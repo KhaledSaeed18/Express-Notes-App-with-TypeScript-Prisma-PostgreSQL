@@ -2,10 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
 import { PrismaClient } from "@prisma/client";
-import { errorHandler } from "../utils/error";
-import { generateAccessToken, generateRefreshToken } from "../utils/generateToken";
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import crypto from 'crypto'
+import { errorHandler, generateAccessToken, generateRefreshToken } from "../utils";
 
 const prisma = new PrismaClient();
 
