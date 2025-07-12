@@ -31,5 +31,12 @@ const baseUrl = `${process.env.BASE_URL!}/${version}`;
 app.use(`${baseUrl}/auth`, authRoutes);
 app.use(`${baseUrl}/note`, noteRoutes);
 
+app.all('*', (req, res) => {
+    res.status(404).json({
+        statusCode: 404,
+        error: 'Not Found',
+        message: `Cannot ${req.method} ${req.originalUrl}`
+    })
+})
 
 app.use(errorMiddleware)
