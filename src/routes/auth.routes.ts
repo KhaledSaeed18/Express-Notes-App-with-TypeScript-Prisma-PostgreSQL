@@ -1,6 +1,6 @@
 import express from "express";
-import { signUp, signIn, refreshAccessToken } from "../controllers";
-import { signupValidation, signinValidation, refreshAccessTokenValidation } from "../validations";
+import { signUp, signIn, refreshAccessToken, logout } from "../controllers";
+import { signupValidation, signinValidation } from "../validations";
 import { authLimiter } from '../middleware';
 
 const authRoutes = express.Router();
@@ -22,8 +22,13 @@ authRoutes.post(
 authRoutes.post(
     "/refresh-token",
     authLimiter,
-    refreshAccessTokenValidation(),
     refreshAccessToken
+);
+
+authRoutes.post(
+    "/logout",
+    authLimiter,
+    logout
 );
 
 export default authRoutes;

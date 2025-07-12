@@ -43,10 +43,3 @@ export const signinValidation = () => {
             .notEmpty().withMessage('Password is required'),
     ];
 };
-
-export const refreshAccessTokenValidation = () => {
-    return [
-        body('refreshToken')
-            .notEmpty().withMessage('Refresh token is required'),
-    ];
-}

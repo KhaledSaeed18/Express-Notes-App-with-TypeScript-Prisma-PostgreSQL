@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import cors from "cors";
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 import { errorMiddleware } from './middleware';
 import { authRoutes, noteRoutes } from './routes';
 
@@ -19,6 +20,7 @@ const corsOptions = {
 app.use(helmet());
 app.use(cors(corsOptions))
 app.use(express.json());
+app.use(cookieParser());
 app.use(morgan('dev'));
 
 const port = process.env.PORT!;
